@@ -5,7 +5,7 @@ CREATE TABLE users (
   password VARCHAR(200) NOT NULL,
   created_at TIMESTAMP DEFAULT current_timestamp,
   modified_at TIMESTAMP NOT NULL,
-  deleted_at TIMESTAMP
-  last_login_at TIMESTAMP DEFAULT current_timestamp
+  deleted_at TIMESTAMP,
+  last_login_at TIMESTAMP DEFAULT current_timestamp,
   PRIMARY KEY(id)
 )
