@@ -2,7 +2,6 @@ package queue
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -12,6 +11,12 @@ type RabbitMQConfig struct {
 	URL       string
 	TopicName string
 	Timeout   time.Time
+}
+
+func newRabbitConn(cfg RabbitMQConfig) (rc *RabbitConnection, err error) {
+	rc.cfg = cfg
+	rc.conn, err = amqp.Dial(rc.cfg.URL)
+	return rc, err
 }
 
 type RabbitConnection struct {
@@ -39,7 +44,7 @@ func (rc *RabbitConnection) Publish(msg []byte) error {
 	return c.PublishWithContext(ctx, "", rc.cfg.TopicName, false, false, mp)
 }
 
-func (rc *RabbitConnection) Consume() error {
+func (rc *RabbitConnection) Consume(cdto chan<- QueueDTO) error {
 	ch, err := rc.conn.Channel()
 	if err != nil {
 		return err
@@ -72,7 +77,10 @@ func (rc *RabbitConnection) Consume() error {
 	}
 
 	for d := range msgs {
-		fmt.Printf("Received a message: %s\n", d.Body)
+		dto := QueueDTO{}
+		dto.Unmarshal(d.Body)
+
+		cdto <- dto
 	}
 
 	return nil

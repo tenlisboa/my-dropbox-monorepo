@@ -16,9 +16,13 @@ func New(qt QueueType, cfg any) (q *Queue, err error) {
 	switch qt {
 	case RabbitMQ:
 		if rt.Name() != "RabbitMQConfig" {
-			return nil, fmt.Errorf("Config is not compatible with queue time: %v", rt.Name())
+			return nil, fmt.Errorf("config is not compatible with queue time: %s", rt.Name())
 		}
-		fmt.Println("RabbitMQ")
+		conn, err := newRabbitConn(cfg.(RabbitMQConfig))
+		if err != nil {
+			return nil, err
+		}
+		q.qc = conn
 	default:
 		log.Fatalf("Unsupported queue type: %v", qt)
 	}
@@ -30,18 +34,17 @@ type QueueType int
 
 type QueueConnection interface {
 	Publish([]byte) error
-	Consume() error
+	Consume(chan<- QueueDTO) error
 }
 
 type Queue struct {
-	cfg any
-	qc  QueueConnection
+	qc QueueConnection
 }
 
 func (q *Queue) Publish(msg []byte) error {
 	return q.qc.Publish(msg)
 }
 
-func (q *Queue) Consume() error {
-	return q.qc.Consume()
+func (q *Queue) Consume(cdto chan<- QueueDTO) error {
+	return q.qc.Consume(cdto)
 }
