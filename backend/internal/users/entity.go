@@ -20,7 +20,7 @@ func New(name, login, password string) (*User, error) {
 	now := time.Now()
 
 	u := User{
-		Name: name, Login: login, CreatedAt: now, ModifiedAt: now,
+		Name: name, Login: login, ModifiedAt: now,
 	}
 
 	if err := u.SetPassword(password); err != nil {
@@ -31,14 +31,14 @@ func New(name, login, password string) (*User, error) {
 }
 
 type User struct {
-	ID          int64
-	Name        string
-	Login       string
-	Password    string
-	CreatedAt   time.Time
-	ModifiedAt  time.Time
-	DeletedAt   time.Time
-	LastLoginAt time.Time
+	ID          int64     `json:"id"`
+	Name        string    `json:"name"`
+	Login       string    `json:"login"`
+	Password    string    `json:"password"`
+	CreatedAt   time.Time `json:"created_at"`
+	ModifiedAt  time.Time `json:"modified_at"`
+	DeletedAt   time.Time `json:"-"`
+	LastLoginAt time.Time `json:"last_login_at"`
 }
 
 func (u *User) SetPassword(password string) error {
