@@ -7,6 +7,15 @@ import (
 	"time"
 )
 
+var (
+	BlankPassword = fmt.Sprintf("%v", md5.Sum([]byte("")))
+
+	ErrPasswordRequired = errors.New("password is required")
+	ErrPasswordLength   = errors.New("password must be at least 8 characters")
+	ErrLoginRequired    = errors.New("login is required")
+	ErrNameRequired     = errors.New("name is required")
+)
+
 func New(name, login, password string) (*User, error) {
 	now := time.Now()
 
@@ -34,13 +43,29 @@ type User struct {
 
 func (u *User) SetPassword(password string) error {
 	if password == "" {
-		return errors.New("password is required")
+		return ErrPasswordRequired
 	}
 
 	if len(password) < 8 {
-		return errors.New("password must be at least 8 characters")
+		return ErrPasswordLength
 	}
 
 	u.Password = fmt.Sprintf("%x", (md5.Sum([]byte(password))))
+	return nil
+}
+
+func (u *User) Validate() error {
+	if u.Name == "" {
+		return ErrNameRequired
+	}
+
+	if u.Login == "" {
+		return ErrLoginRequired
+	}
+
+	if u.Password == BlankPassword {
+		return ErrPasswordRequired
+	}
+
 	return nil
 }
